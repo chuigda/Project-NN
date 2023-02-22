@@ -24,20 +24,20 @@ typedef void (nn_destroy_fn)(void *ptr);
 typedef struct {} nn_arena_t;
 
 /**
- * Creates an arena
+ * @brief Create an arena
  * @return the created arena on success, `NULL` on out of memory
  */
 nn_arena_t *nn_arena_create();
 
 /**
- * Destroy an arena and all objects it holds
+ * @brief Destroy an arena and all objects it holds
  * @param arena the arena to be destroyed. if it is `NULL`, nothing would
  *              happen
  */
 void nn_arena_destroy(nn_arena_t *arena);
 
 /**
- * Add a resource to arena
+ * @brief Add a resource to arena
  * @param arena the arena to use
  * @param ptr the resource to be added
  * @param dtor the custom resoure dtor to be run for destroying resource

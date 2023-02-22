@@ -44,26 +44,50 @@ void nn_fnn_destroy(nn_fnn_t *fnn) {
     }
 }
 
-_Bool nn_fnn_add_layer(nn_fnn_t *fnn,
-                       size_t in_dim,
-                       size_t n_cnt,
-                       nn_threshold_fn *thres) {
+nn_error_t nn_fnn_add_layer(nn_fnn_t *fnn,
+                            size_t in_dim,
+                            size_t n_cnt,
+                            nn_threshold_fn *thres) {
     assert(fnn && in_dim && n_cnt && thres);
     if (!(fnn && in_dim && n_cnt && thres)) {
-        return 0;
+        return NN_INVALID_VALUE;
+    }
+
+    nn_fnn_impl_t *impl = (nn_fnn_impl_t*)fnn;
+    if (impl->last && impl->last->n_cnt != in_dim) {
+        return NN_INVALID_VALUE;
     }
 
     nn_fnn_layer_t *layer = 
         malloc(sizeof(nn_fnn_layer_t) + n_cnt * sizeof(nn_neuron_t));
     if (!layer) {
-        return 0;
+        return NN_OUT_OF_MEMORY;
     }
 
     layer->next = NULL;
     layer->n_cnt = n_cnt;
     for (size_t i = 0; i < n_cnt; i++) {
         nn_neuron_t *n = nn_neuron_create(in_dim, thres);
+        if (!n) {
+            for (size_t j = 0; j < i; j++) {
+                nn_neuron_destroy(layer->n[j]);
+            }
+            free(layer);
+            return NN_OUT_OF_MEMORY;
+        }
+        
+        layer->n[i] = n;
     }
 
-    return 1;
+    if (!impl->layers) {
+        layer->prev = NULL;
+        impl->layers = layer;
+        impl->last = layer;
+    } else {
+        layer->prev = impl->last;
+        impl->last->next = layer;
+        impl->last = layer;
+    }
+
+    return NN_NO_ERROR;
 }
