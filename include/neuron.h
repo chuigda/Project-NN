@@ -41,6 +41,13 @@ nn_neuron_t *nn_neuron_create(size_t dim, nn_threshold_fn *thres);
 void nn_neuron_destroy(nn_neuron_t* n);
 
 /**
+ * @brief Get the input dimension of the perceptron
+ * @param n the perceptron, must not be `NULL`
+ * @return the input dimension of the perceptron
+ */
+size_t nn_neuron_in_dim(nn_neuron_t *n);
+
+/**
  * @brief Train the perceptron with an input and expected output
  * @param n the perceptron, must not be `NULL`
  * @param x input vector, must not be `NULL`

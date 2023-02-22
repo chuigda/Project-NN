@@ -91,3 +91,31 @@ nn_error_t nn_fnn_add_layer(nn_fnn_t *fnn,
 
     return NN_NO_ERROR;
 }
+
+size_t nn_fnn_in_dim(nn_fnn_t *fnn) {
+    assert(fnn);
+    if (!fnn) {
+        return 0;
+    }
+
+    nn_fnn_impl_t *impl = (nn_fnn_impl_t*)fnn;
+    if (impl->layers) {
+        return nn_neuron_in_dim(impl->layers->n[0]);
+    } else {
+        return 0;
+    }
+}
+
+size_t nn_fnn_out_dim(nn_fnn_t *fnn) {
+    assert(fnn);
+    if (!fnn) {
+        return 0;
+    }
+
+    nn_fnn_impl_t *impl = (nn_fnn_impl_t*)fnn;
+    if (impl->last) {
+        return impl->last->n_cnt;
+    } else {
+        return 0;
+    }
+}

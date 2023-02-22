@@ -35,6 +35,16 @@ void nn_neuron_destroy(nn_neuron_t *n) {
   free(n);
 }
 
+size_t nn_neuron_in_dim(nn_neuron_t *n) {
+  assert(n);
+  if (!n) {
+    return 0;
+  }
+
+  nn_neuron_impl_t *impl = (nn_neuron_impl_t*)n;
+  return impl->dim;
+}
+
 void nn_neuron_train(nn_neuron_t *n, float *x, float e, float r) {
   assert(n && x);
   if (!(n && x)) {
