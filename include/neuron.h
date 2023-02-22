@@ -10,12 +10,7 @@ extern "C" {
 
 typedef float (nn_threshold_fn)(float value);
 
-typedef struct {
-  nn_threshold_fn *thres;
-  size_t dim;
-  float b;
-  float w[];
-} nn_neuron_t;
+typedef struct {} nn_neuron_t;
 
 nn_neuron_t *nn_neuron_create(size_t dim, nn_threshold_fn *thres);
 
