@@ -4,6 +4,11 @@
 #include <stdlib.h>
 
 nn_neuron_t *nn_neuron_create(size_t dim, nn_threshold_fn *thres) {
+  assert(thres);
+  if (!thres) {
+    return NULL;
+  }
+
   nn_neuron_t *r = malloc(sizeof(nn_neuron_t) + dim * sizeof(float));
   if (!r) {
     return NULL;
@@ -24,6 +29,11 @@ void nn_neuron_destroy(nn_neuron_t *n) {
 }
 
 void nn_neuron_train(nn_neuron_t *n, float *x, float e, float r) {
+  assert(n && x);
+  if (!(n && x)) {
+    return;
+  }
+
   float y = nn_neuron_test(n, x);
   float d = e - y;
   for (size_t i = 0; i < n->dim; i++) {
@@ -33,6 +43,11 @@ void nn_neuron_train(nn_neuron_t *n, float *x, float e, float r) {
 }
 
 float nn_neuron_test(nn_neuron_t *n, float *x) {
+  assert(n);
+  if (!n) {
+    return 0.0;
+  }
+
   float activation = n->b;
   for (size_t i = 0; i < n->dim; i++) {
     activation += n->w[i] * x[i];

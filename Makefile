@@ -2,7 +2,7 @@ ifndef CC
 	CC = gcc
 endif
 ifndef CFLAGS
-	CFLAGS = -Wall -Wextra -Iinclude -O2 -g
+	CFLAGS = -Wall -Wextra -Iinclude -g $(EXTRA_CFLAGS)
 endif
 
 define LOG
@@ -19,11 +19,17 @@ SOURCE_FILES = $(wildcard src/*.c)
 
 OBJECT_FILES := $(patsubst src/%.c,%.o,$(SOURCE_FILES))
 
+.PHONY: libn2nn libn2nn-log
+libn2nn: libn2nn-log libn2nn.so
+
+libn2nn-log:
+	@echo 'Building libn2nn.so'
+
 libn2nn.so: $(OBJECT_FILES)
 	$(call LOG,LINK,libn2nn.so)
 	@$(CC) $(CFLAGS) -fPIC -shared $(SOURCE_FILES) -o libn2nn.so
 
-%.o: src/%.c $(SOURCE_FILES)
+%.o: src/%.c $(HEADER_FILES)
 	$(call COMPILE,$<,$@)
 
 define BUILD_TEST_ITEM
@@ -37,12 +43,22 @@ define RUN_TEST_ITEM
 	@if [ $$? -eq 0 ]; then printf 'PASS\n'; else printf 'FAIL\n'; fi
 endef
 
-.PHONY: test
-test: test_neuron.bin
+.PHONY: test test-log
+test: libn2nn test-log test_arena test_neuron
+
+test-log:
+	@echo 'Running tests'
+
+.PHONY: test_arena
+test_arena: test_arena.bin
+	$(call RUN_TEST_ITEM,test_arena.bin)
+
+.PHONY: test_neuron
+test_neuron: test_neuron.bin
 	$(call RUN_TEST_ITEM,test_neuron.bin)
 
 %.bin: test/%.c libn2nn.so
-	$(call BUILD_TEST_ITEM,test_neuron.bin,test/test_neuron.c)
+	$(call BUILD_TEST_ITEM,$@,$<)
 
 .PHONY: clean
 clean:
