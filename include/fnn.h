@@ -70,7 +70,7 @@ size_t nn_fnn_out_dim(nn_fnn_t *fnn);
 
 nn_error_t nn_fnn_train(nn_fnn_t *fnn, float *x, float *e, float r);
 
-nn_error_t nn_fnn_test(nn_fnn_t *fnn, float *x, float *e);
+nn_error_t nn_fnn_test(nn_fnn_t *fnn, float *x, float *y);
 
 #ifdef __cplusplus
 } /* extern "C" */
