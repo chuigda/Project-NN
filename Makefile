@@ -76,3 +76,5 @@ clean:
 	rm -f *.a
 	rm -f *.so
 	rm -f test_*.bin*
+	rm -rf html
+	rm -rf latex

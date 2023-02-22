@@ -11,8 +11,8 @@ typedef struct {
 } nn_neuron_impl_t;
 
 nn_neuron_t *nn_neuron_create(size_t dim, nn_threshold_fn *thres) {
-  assert(thres);
-  if (!thres) {
+  assert(dim && thres);
+  if (!(dim && thres)) {
     return NULL;
   }
 

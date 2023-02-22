@@ -33,7 +33,6 @@ nn_arena_t *nn_arena_create() {
 }
 
 void nn_arena_destroy(nn_arena_t *arena) {
-    assert(arena);
     if (!arena) {
         return;
     }
@@ -43,15 +42,17 @@ void nn_arena_destroy(nn_arena_t *arena) {
         nn_arena_item_t *item = &impl->items[i];
         if (item->dtor) {
             item->dtor(item->ptr);
+        } else {
+            free(item->ptr);
         }
     }
     free(impl);
 }
 
-_Bool nn_arena_put(nn_arena_t *arena, void *ptr, nn_destroy_fn *dtor) {
+nn_error_t nn_arena_put(nn_arena_t *arena, void *ptr, nn_destroy_fn *dtor) {
     assert(arena);
     if (!(arena && ptr)) {
-        return 0;
+        return NN_INVALID_VALUE;
     }
 
     nn_arena_impl_t *impl = (nn_arena_impl_t*)arena;
@@ -59,7 +60,7 @@ _Bool nn_arena_put(nn_arena_t *arena, void *ptr, nn_destroy_fn *dtor) {
         impl->items = 
             malloc(NN_ARENA_INIT_CAP * sizeof(nn_arena_item_t));
         if (!impl->items) {
-            return 0;
+            return NN_OUT_OF_MEMORY;
         }
 
         impl->cap = NN_ARENA_INIT_CAP;
@@ -72,7 +73,7 @@ _Bool nn_arena_put(nn_arena_t *arena, void *ptr, nn_destroy_fn *dtor) {
         nn_arena_item_t *new_items = 
             malloc(impl->cap * 2 * sizeof(nn_arena_impl_t));
         if (!new_items) {
-            return 0;
+            return NN_OUT_OF_MEMORY;
         }
 
         memcpy(new_items,
@@ -85,5 +86,5 @@ _Bool nn_arena_put(nn_arena_t *arena, void *ptr, nn_destroy_fn *dtor) {
 
     impl->items[impl->size] = (nn_arena_item_t) { ptr, dtor };
     impl->size += 1;
-    return 1;
+    return NN_NO_ERROR;
 }
