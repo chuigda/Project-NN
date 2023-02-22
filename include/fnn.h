@@ -68,9 +68,9 @@ size_t nn_fnn_in_dim(nn_fnn_t *fnn);
  */
 size_t nn_fnn_out_dim(nn_fnn_t *fnn);
 
-void nn_fnn_train(nn_fnn_t *fnn, float *x, float e, float r);
+nn_error_t nn_fnn_train(nn_fnn_t *fnn, float *x, float *e, float r);
 
-float nn_fnn_test(nn_fnn_t *fnn, float *x);
+nn_error_t nn_fnn_test(nn_fnn_t *fnn, float *x, float *e);
 
 #ifdef __cplusplus
 } /* extern "C" */
