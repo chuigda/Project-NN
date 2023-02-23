@@ -15,7 +15,11 @@ typedef struct st_fnn_layer {
     nn_deriv_fn *deriv;
 
     size_t n_cnt;
-    nn_neuron_t *n[];
+    nn_neuron_t **n;
+    float *output;
+    float *delta;
+
+    _Alignas(uint64_t) uint8_t buffer[];
 } nn_fnn_layer_t;
 
 struct st_nn_imp_fnn {
@@ -23,7 +27,7 @@ struct st_nn_imp_fnn {
     nn_fnn_layer_t *last;
     
     float *buffer;
-    float *buf_ptr[8];
+    float *buf_ptr[4];
 };
 
 nn_fnn_t *nn_fnn_create() {
@@ -82,15 +86,22 @@ nn_error_t nn_fnn_add_layer(nn_fnn_t *fnn,
         return NN_INVALID_OPERATION;
     }
 
-    nn_fnn_layer_t *layer = 
-        malloc(sizeof(nn_fnn_layer_t) + n_cnt * sizeof(nn_neuron_t*));
+    size_t extra_size = 
+        n_cnt * (sizeof(nn_neuron_t*) + 2 * sizeof(float));
+
+    nn_fnn_layer_t *layer = malloc(sizeof(nn_fnn_layer_t) + extra_size);
     if (!layer) {
         return NN_OUT_OF_MEMORY;
     }
 
+    size_t output_offset = n_cnt * sizeof(nn_neuron_t*);
+    size_t delta_offset = output_offset + n_cnt * sizeof(float);
     layer->next = NULL;
     layer->deriv = deriv;
     layer->n_cnt = n_cnt;
+    layer->n = (nn_neuron_t**)layer->buffer;
+    layer->output = (float*)(layer->buffer + output_offset);
+    layer->delta = (float*)(layer->buffer + delta_offset);
     for (size_t i = 0; i < n_cnt; i++) {
         nn_neuron_t *n = nn_neuron_create(in_dim, trans);
         if (!n) {
@@ -173,7 +184,7 @@ nn_error_t nn_fnn_fin(nn_fnn_t *fnn) {
     }
 
     fnn->buffer = buffer;
-    for (size_t i = 0; i < 8; i++) {
+    for (size_t i = 0; i < 4; i++) {
         fnn->buf_ptr[i] = buffer + i * max_dim;
     }
 
@@ -189,7 +200,7 @@ nn_error_t nn_fnn_train(nn_fnn_t *fnn, float *x, float *e, float r) {
     if (!(fnn->layers && fnn->buffer)) {
         return NN_INVALID_OPERATION;
     }
-    
+
     return NN_UNIMPLEMENTED;
 }
 
