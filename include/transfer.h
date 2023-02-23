@@ -16,6 +16,13 @@ extern "C" {
 typedef float (nn_transfer_fn)(float value);
 
 /**
+ * @brief Linear function
+ * @param value input value
+ * @return `value` itself
+ */
+float nn_transfer_linear(float value);
+
+/**
  * @brief Threshold/step function
  * @param value input value
  * @return `value >= 0.0f ? 1.0f : 0.0f`

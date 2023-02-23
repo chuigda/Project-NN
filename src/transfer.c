@@ -2,6 +2,10 @@
 
 #include <math.h>
 
+float nn_transfer_linear(float value) {
+    return value;
+}
+
 float nn_transfer_thres(float value) {
     return value >= 0.0f ? 1.0f : 0.0f;
 }

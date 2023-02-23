@@ -48,8 +48,8 @@ define BUILD_TEST_ITEM
 endef
 
 define RUN_TEST_ITEM
-	@printf '\tTEST\t%s\t\t\t' $1
-	@LD_LIBRARY_PATH=. ./$1 > /dev/null
+	@printf '\tTEST\t%s/%s\t\t\t' $1 $2
+	@LD_LIBRARY_PATH=. ./$1 $2 > /dev/null
 	@if [ $$? -eq 0 ]; then printf 'PASS\n'; else printf 'FAIL\n'; fi
 endef
 
@@ -65,7 +65,8 @@ test_arena: test_arena.bin
 
 .PHONY: test_neuron
 test_neuron: test_neuron.bin
-	$(call RUN_TEST_ITEM,test_neuron.bin)
+	$(call RUN_TEST_ITEM,test_neuron.bin,0)
+	$(call RUN_TEST_ITEM,test_neuron.bin,1)
 
 .PHONY: test_fnn
 test_fnn: test_fnn.bin
