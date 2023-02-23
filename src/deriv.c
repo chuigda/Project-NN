@@ -37,8 +37,7 @@ float nn_deriv_tanh(nn_transfer_fn *trans, float x, float y) {
     return 4.0 / denom;
 }
 
-float nn_deriv_relu(nn_transfer_fn *trans, float x, float y)
-{
+float nn_deriv_relu(nn_transfer_fn *trans, float x, float y) {
     (void)trans;
     (void)y;
     if (x <= 0) {

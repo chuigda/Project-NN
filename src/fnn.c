@@ -3,12 +3,16 @@
 #include <assert.h>
 #include <stdlib.h>
 #include <string.h>
+
+#include "deriv.h"
 #include "neuron.h"
 #include "impl/util.h"
 
 typedef struct st_fnn_layer {
     struct st_fnn_layer *prev;
     struct st_fnn_layer *next;
+
+    nn_deriv_fn *deriv;
 
     size_t n_cnt;
     nn_neuron_t *n[];
@@ -18,8 +22,8 @@ typedef struct {
     nn_fnn_layer_t *layers;
     nn_fnn_layer_t *last;
     
-    float *buffer1;
-    float *buffer2;
+    float *buffer;
+    float *buf_ptr[8];
 } nn_fnn_impl_t;
 
 nn_fnn_t *nn_fnn_create() {
@@ -27,8 +31,8 @@ nn_fnn_t *nn_fnn_create() {
     if (r) {
         r->layers = NULL;
         r->last = NULL;
-        r->buffer1 = NULL;
-        r->buffer2 = NULL;
+        r->buffer = NULL;
+        memset(&r->buf_ptr, 0, sizeof(r->buf_ptr));
     }
     return (nn_fnn_t*)r;
 }
@@ -40,7 +44,10 @@ void nn_fnn_destroy(nn_fnn_t *fnn) {
 
     nn_fnn_impl_t *impl = (nn_fnn_impl_t*)fnn;
 
-    for (nn_fnn_layer_t *layer = impl->layers; layer != NULL; /* nop */) {
+    for (nn_fnn_layer_t *layer = impl->layers;
+         layer != NULL;
+         /* nop */)
+    {
         for (size_t i = 0; i < layer->n_cnt; i++) {
             nn_neuron_destroy(layer->n[i]);
         }
@@ -50,22 +57,22 @@ void nn_fnn_destroy(nn_fnn_t *fnn) {
         free(this_layer);
     }
 
-    if (impl->buffer1) {
-        free(impl->buffer1);
-    }
-    if (impl->buffer2) {
-        free(impl->buffer2);
-    }
-
+    free(impl->buffer);
     free(fnn);
 }
 
 nn_error_t nn_fnn_add_layer(nn_fnn_t *fnn,
                             size_t in_dim,
                             size_t n_cnt,
-                            nn_transfer_fn *trans) {
+                            nn_transfer_fn *trans) 
+{
     assert(fnn && in_dim && n_cnt && trans);
     if (!(fnn && in_dim && n_cnt && trans)) {
+        return NN_INVALID_VALUE;
+    }
+
+    nn_deriv_fn *deriv = nn_deriv(trans);
+    if (!deriv) {
         return NN_INVALID_VALUE;
     }
 
@@ -74,7 +81,7 @@ nn_error_t nn_fnn_add_layer(nn_fnn_t *fnn,
         return NN_INVALID_VALUE;
     }
 
-    if (impl->buffer1) {
+    if (impl->buffer) {
         return NN_INVALID_OPERATION;
     }
 
@@ -85,6 +92,7 @@ nn_error_t nn_fnn_add_layer(nn_fnn_t *fnn,
     }
 
     layer->next = NULL;
+    layer->deriv = deriv;
     layer->n_cnt = n_cnt;
     for (size_t i = 0; i < n_cnt; i++) {
         nn_neuron_t *n = nn_neuron_create(in_dim, trans);
@@ -165,17 +173,31 @@ nn_error_t nn_fnn_fin(nn_fnn_t *fnn) {
         }
     }
 
-    float *buffer1 = malloc(max_dim * sizeof(float));
-    float *buffer2 = malloc(max_dim * sizeof(float));
-    if (!(buffer1 && buffer2)) {
-        free(buffer1);
-        free(buffer2);
+    float *buffer = malloc(max_dim * 8 * sizeof(float));
+    if (!buffer) {
         return NN_OUT_OF_MEMORY;
     }
 
-    impl->buffer1 = buffer1;
-    impl->buffer2 = buffer2;
+    impl->buffer = buffer;
+    for (size_t i = 0; i < 8; i++) {
+        impl->buf_ptr[i] = buffer + i * max_dim;
+    }
+
     return NN_NO_ERROR;
+}
+
+nn_error_t nn_fnn_train(nn_fnn_t *fnn, float *x, float *e, float r) {
+    assert(fnn && x && e && r > 0.0f);
+    if (!(fnn && x && e && r > 0.0f)) {
+        return NN_INVALID_VALUE;
+    }
+
+    nn_fnn_impl_t *impl = (nn_fnn_impl_t*)fnn;
+    if (!(impl->layers && impl->buffer)) {
+        return NN_INVALID_OPERATION;
+    }
+    
+    return NN_UNIMPLEMENTED;
 }
 
 nn_error_t nn_fnn_test(nn_fnn_t *fnn, float *x, float *y) {
@@ -185,13 +207,13 @@ nn_error_t nn_fnn_test(nn_fnn_t *fnn, float *x, float *y) {
     }
 
     nn_fnn_impl_t *impl = (nn_fnn_impl_t*)fnn;
-    if (!(impl->layers && impl->buffer1 && impl->buffer2)) {
+    if (!(impl->layers && impl->buffer)) {
         return NN_INVALID_OPERATION;
     }
 
     size_t in_dim = nn_fnn_in_dim(fnn);
-    float *inbuf = impl->buffer1;
-    float *outbuf = impl->buffer2;
+    float *inbuf = impl->buf_ptr[0];
+    float *outbuf = impl->buf_ptr[1];
     memcpy(inbuf, x, in_dim * sizeof(float));
 
     for (nn_fnn_layer_t *layer = impl->layers;

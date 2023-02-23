@@ -46,8 +46,8 @@ size_t nn_neuron_dim(nn_neuron_t *n) {
 }
 
 void nn_neuron_train(nn_neuron_t *n, float *x, float e, float r) {
-  assert(n && x);
-  if (!(n && x)) {
+  assert(n && x && r > 0.0f);
+  if (!(n && x && r > 0.0f)) {
     return;
   }
 

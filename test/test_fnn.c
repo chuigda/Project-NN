@@ -8,7 +8,7 @@ int main() {
            == NN_NO_ERROR);
     assert(nn_fnn_add_layer(fnn, 10, 5, nn_transfer_logistic)
            == NN_NO_ERROR);
-    assert(nn_fnn_add_layer(fnn, 5, 1, nn_transfer_thres)
+    assert(nn_fnn_add_layer(fnn, 5, 1, nn_transfer_logistic)
            == NN_NO_ERROR);
 
     assert(nn_fnn_in_dim(fnn) == 10);

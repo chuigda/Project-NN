@@ -48,11 +48,11 @@ void nn_neuron_destroy(nn_neuron_t* n);
 size_t nn_neuron_dim(nn_neuron_t *n);
 
 /**
- * @brief Train the perceptron with an input and expected output
+ * @brief Train the perceptron with given input/output at a learning rate
  * @param n the perceptron, must not be `NULL`
  * @param x input vector, must not be `NULL`
  * @param e expected output
- * @param r learning rate
+ * @param r learning rate, must be greater than `0.0f`
  */
 void nn_neuron_train(nn_neuron_t *n, float *x, float e, float r);
 

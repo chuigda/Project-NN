@@ -28,6 +28,9 @@ typedef enum {
 
     /** Out of memory */
     NN_OUT_OF_MEMORY = 0x0505,
+
+    /** Not implemented */
+    NN_UNIMPLEMENTED = 0x1145
 } nn_error_t;
 
 #ifdef __cplusplus

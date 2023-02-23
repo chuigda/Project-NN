@@ -41,11 +41,13 @@ void nn_fnn_destroy(nn_fnn_t *fnn);
  *               (`n_cnt`, neuron count) of that "prev" layer
  * @param n_cnt number of neurons in this layer, must not be 0. also,
  *              this would become the output dimension of this layer
- * @param trans transfer function, must not be `NULL`
+ * @param trans transfer function, must not be `NULL` and must be
+ *              differentiable
  * @return
  *   - `NN_NO_ERROR` on success
  *   - `NN_OUT_OF_MEMORY` on out of memory
  *   - `NN_INVALID_VALUE` on dimension mismatch
+ *   - `NN_INVALID_VALUE` if `trans` is not differentiable
  *   - `NN_INVALID_OPERATION` if `fnn` has already been finalized
  */
 nn_error_t nn_fnn_add_layer(nn_fnn_t *fnn,
@@ -75,11 +77,22 @@ size_t nn_fnn_out_dim(nn_fnn_t *fnn);
  * @return
  *   - `NN_NO_ERROR` on success
  *   - `NN_INVALID_OPERATION` if `fnn` has not been properly initialised,
- *     or `fnn` has already been finalized
+ *      or `fnn` has already been finalized
  *   - `NN_OUT_OF_MEMORY` if failed allocating auxiliary space
  */
 nn_error_t nn_fnn_fin(nn_fnn_t *fnn);
 
+/**
+ * @brief Train the FNN with given input/output at a learning rate
+ * @param fnn the FNN, must not be `NULL`
+ * @param x input vector, must not be `NULL`
+ * @param e expected output, must not be `NULL`
+ * @param r learning rate
+ * @return
+ *   - `NN_NO_ERROR` on success
+ *   - `NN_INVALID_OPERATION` if `fnn` has not been properly initalized
+ *     and finalized
+ */
 nn_error_t nn_fnn_train(nn_fnn_t *fnn, float *x, float *e, float r);
 
 /**
