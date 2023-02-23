@@ -27,6 +27,9 @@ typedef struct {} nn_neuron_t;
  * @param trans transfer function, must not be `NULL`
  * @return the created perceptron on success,
  *         `NULL` on out of memory
+ *
+ * @note When playing with single-layer perceptron, only linear and
+ *       step functions are really meaningful.
  */
 nn_neuron_t *nn_neuron_create(size_t dim, nn_transfer_fn *trans);
 
