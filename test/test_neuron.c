@@ -10,7 +10,7 @@ static int random_int(int l, int r) {
   return (rand() % (r - l)) + l;
 }
 
-void test_neuron0() {
+void test_neuron1() {
   nn_neuron_t *n = nn_neuron_create(3, nn_transfer_thres);
   
   for (size_t i = 0; i < 4096 * 4096; i++) {
@@ -46,9 +46,7 @@ void test_neuron0() {
   nn_neuron_destroy(n);
 }
 
-void test_neuron1() {
-  printf("test_neuron1\n");
-
+void test_neuron2() {
   nn_neuron_t *n = nn_neuron_create(3, nn_transfer_linear);
   
   for (size_t i = 0; i < 4096 * 4096; i++) {
@@ -97,8 +95,8 @@ int main(int argc, const char *argv[]) {
   int test = atoi(argv[1]);
 
   switch (test) {
-    case 0: test_neuron0(); break;
     case 1: test_neuron1(); break;
+    case 2: test_neuron2(); break;
     default: assert(0 && "invalid test item");
   }
 

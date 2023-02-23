@@ -23,9 +23,36 @@ extern "C" {
 typedef float (nn_deriv_fn)(nn_transfer_fn *trans, float x, float y);
 
 /**
+ * @brief General numeric derivative function
+ */
+float nn_deriv_num(nn_transfer_fn *trans, float x, float y);
+
+/**
+ * @brief Derivative of linear (`nn_transfer_linear`)
+ */
+float nn_deriv_linear(nn_transfer_fn *trans, float x, float y);
+
+/**
+ * @brief Derivative of logistic (`nn_transfer_logistic`)
+ */
+float nn_deriv_logistic(nn_transfer_fn *trans, float x, float y);
+
+/**
+ * @brief Derivative of tanh (`nn_transfer_tanh`)
+ */
+float nn_deriv_tanh(nn_transfer_fn *trans, float x, float y);
+
+/**
+ * @brief Derivative of ReLU (`nn_transfer_relu`)
+ */
+float nn_deriv_relu(nn_transfer_fn *trans, float x, float y);
+
+/**
  * @brief Register a derivative function to a transfer function
  * @param f the source function, must not be `NULL`
- * @param deriv the derivative function, must not be `NULL`
+ * @param deriv the derivative function. can be `NULL`, in that case,
+ *              the corresponding function `f` will be taken as
+ *              not differentiable
  * @return
  *   - `NN_NO_ERROR` if deriv function got successfully registered
  *   - `NN_INVALID_VALUE` if source function already has a registered
@@ -43,7 +70,7 @@ typedef float (nn_deriv_fn)(nn_transfer_fn *trans, float x, float y);
  *     when `x == 0`, it is still very useful in neural networks. thus
  *     ```f'(0) == 0``` was defined for ReLU's "derivative" function
  */
-nn_error_t nn_deriv_register(nn_transfer_fn *f, nn_deriv_fn *deriv);
+nn_error_t nn_deriv_reg(nn_transfer_fn *f, nn_deriv_fn *deriv);
 
 /**
  * @brief Get the derivative function of input transfer function

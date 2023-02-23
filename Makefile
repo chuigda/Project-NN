@@ -48,29 +48,38 @@ define BUILD_TEST_ITEM
 endef
 
 define RUN_TEST_ITEM
-	@printf '\tTEST\t%s/%s\t\t\t' $1 $2
-	@LD_LIBRARY_PATH=. ./$1 $2 > /dev/null
+	@printf '\tTEST\t%s\t\t\tCASE %s/%s\t' $1 $2 $3
+	@LD_LIBRARY_PATH=. ./$1.bin $2 > /dev/null
 	@if [ $$? -eq 0 ]; then printf 'PASS\n'; else printf 'FAIL\n'; fi
 endef
 
 .PHONY: test test-log
-test: libn2nn test-log test_arena test_neuron test_fnn
+test: libn2nn \
+	test-log \
+	test_arena \
+	test_deriv \
+	test_neuron \
+	test_fnn
 
 test-log:
 	@echo 'Running tests'
 
 .PHONY: test_arena
 test_arena: test_arena.bin
-	$(call RUN_TEST_ITEM,test_arena.bin)
+	$(call RUN_TEST_ITEM,test_arena,1,1)
+
+.PHONY: test_deriv
+test_deriv: test_deriv.bin
+	$(call RUN_TEST_ITEM,test_deriv,1,1)
 
 .PHONY: test_neuron
 test_neuron: test_neuron.bin
-	$(call RUN_TEST_ITEM,test_neuron.bin,0)
-	$(call RUN_TEST_ITEM,test_neuron.bin,1)
+	$(call RUN_TEST_ITEM,test_neuron,1,2)
+	$(call RUN_TEST_ITEM,test_neuron,2,2)
 
 .PHONY: test_fnn
 test_fnn: test_fnn.bin
-	$(call RUN_TEST_ITEM,test_fnn.bin)
+	$(call RUN_TEST_ITEM,test_fnn,1,1)
 
 %.bin: test/%.c libn2nn.so
 	$(call BUILD_TEST_ITEM,$@,$<)
