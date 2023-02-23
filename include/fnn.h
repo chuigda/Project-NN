@@ -41,7 +41,7 @@ void nn_fnn_destroy(nn_fnn_t *fnn);
  *               (`n_cnt`, neuron count) of that "prev" layer
  * @param n_cnt number of neurons in this layer, must not be 0. also,
  *              this would become the output dimension of this layer
- * @param thres threshold/step function, must not be `NULL`
+ * @param trans transfer function, must not be `NULL`
  * @return
  *   - `NN_NO_ERROR` on success
  *   - `NN_OUT_OF_MEMORY` on out of memory
@@ -50,13 +50,13 @@ void nn_fnn_destroy(nn_fnn_t *fnn);
 nn_error_t nn_fnn_add_layer(nn_fnn_t *fnn,
                             size_t in_dim,
                             size_t n_cnt,
-                            nn_threshold_fn *thres);
+                            nn_transfer_fn *trans);
 
 /**
  * @brief Get the input dimension of the FNN
  * @param fnn the FNN, must not be `NULL`
  * @return input dimension of the FNN (in effect, the `in_dim` of first
-           layer added). if `fnn` has no layer, 0 will be returned
+ *         layer added). if `fnn` has no layer, 0 will be returned
  */
 size_t nn_fnn_in_dim(nn_fnn_t *fnn);
 
@@ -64,7 +64,7 @@ size_t nn_fnn_in_dim(nn_fnn_t *fnn);
  * @brief Get the current output dimension of the FNN
  * @param fnn the FNN, must not be `NULL`
  * @return output dimension of the FNN (in effect, the `n_cnt` of the
-           last layer added). if `fnn` has no layer, 0 will be returned
+ *         last layer added). if `fnn` has no layer, 0 will be returned
  */
 size_t nn_fnn_out_dim(nn_fnn_t *fnn);
 

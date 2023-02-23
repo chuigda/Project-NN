@@ -47,9 +47,9 @@ void nn_fnn_destroy(nn_fnn_t *fnn) {
 nn_error_t nn_fnn_add_layer(nn_fnn_t *fnn,
                             size_t in_dim,
                             size_t n_cnt,
-                            nn_threshold_fn *thres) {
-    assert(fnn && in_dim && n_cnt && thres);
-    if (!(fnn && in_dim && n_cnt && thres)) {
+                            nn_transfer_fn *trans) {
+    assert(fnn && in_dim && n_cnt && trans);
+    if (!(fnn && in_dim && n_cnt && trans)) {
         return NN_INVALID_VALUE;
     }
 
@@ -67,7 +67,7 @@ nn_error_t nn_fnn_add_layer(nn_fnn_t *fnn,
     layer->next = NULL;
     layer->n_cnt = n_cnt;
     for (size_t i = 0; i < n_cnt; i++) {
-        nn_neuron_t *n = nn_neuron_create(in_dim, thres);
+        nn_neuron_t *n = nn_neuron_create(in_dim, trans);
         if (!n) {
             for (size_t j = 0; j < i; j++) {
                 nn_neuron_destroy(layer->n[j]);

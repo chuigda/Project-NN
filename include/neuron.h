@@ -14,10 +14,7 @@ extern "C" {
 #include <stddef.h>
 #include <stdint.h>
 
-/**
- * @brief Threshold/step function for perceptron
- */
-typedef float (nn_threshold_fn)(float value);
+#include "transfer.h"
 
 /**
  * @brief A very basic perceptron (artificial neuron)
@@ -27,11 +24,11 @@ typedef struct {} nn_neuron_t;
 /**
  * @brief Create a perceptron
  * @param dim input vector dimensions, must not be 0
- * @param thres threshold function, must not be `NULL`
+ * @param trans transfer function, must not be `NULL`
  * @return the created perceptron on success,
  *         `NULL` on out of memory
  */
-nn_neuron_t *nn_neuron_create(size_t dim, nn_threshold_fn *thres);
+nn_neuron_t *nn_neuron_create(size_t dim, nn_transfer_fn *trans);
 
 /**
  * @brief Destroy a perceptron, reclaiming its memory resources

@@ -4,15 +4,15 @@
 #include <stdlib.h>
 
 typedef struct {
-  nn_threshold_fn *thres;
+  nn_transfer_fn *trans;
   size_t dim;
   float b;
   float w[];
 } nn_neuron_impl_t;
 
-nn_neuron_t *nn_neuron_create(size_t dim, nn_threshold_fn *thres) {
-  assert(dim && thres);
-  if (!(dim && thres)) {
+nn_neuron_t *nn_neuron_create(size_t dim, nn_transfer_fn *trans) {
+  assert(dim && trans);
+  if (!(dim && trans)) {
     return NULL;
   }
 
@@ -21,7 +21,7 @@ nn_neuron_t *nn_neuron_create(size_t dim, nn_threshold_fn *thres) {
     return NULL;
   }
 
-  r->thres = thres;
+  r->trans = trans;
   r->dim = dim;
   r->b = 0.0;
   for (size_t i = 0; i < dim; i++) {
@@ -73,5 +73,5 @@ float nn_neuron_test(nn_neuron_t *n, float *x) {
   for (size_t i = 0; i < impl->dim; i++) {
     activation += impl->w[i] * x[i];
   }
-  return impl->thres(activation);
+  return impl->trans(activation);
 }

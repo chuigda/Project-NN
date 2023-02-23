@@ -5,14 +5,6 @@
 #include <stdlib.h>
 #include <time.h>
 
-static float step(float a) {
-  if (a >= 0.0) {
-    return 1.0;
-  } else {
-    return 0.0;
-  }
-}
-
 static int random_int(int l, int r) {
   return (rand() % (r - l)) + l;
 }
@@ -20,7 +12,7 @@ static int random_int(int l, int r) {
 int main() {
   srand(time(NULL));
 
-  nn_neuron_t *n = nn_neuron_create(3, step);
+  nn_neuron_t *n = nn_neuron_create(3, nn_transfer_thres);
   
   for (size_t i = 0; i < 4096 * 4096; i++) {
     float r = (float)random_int(0, 256),
@@ -34,9 +26,9 @@ int main() {
 
   int correct = 0, incorrect = 0;
   for (size_t i = 0; i < 4096; i++) {
-    float r = (float)random_int(0, 256),
-          g = (float)random_int(0, 256),
-          b = (float)random_int(0, 256);
+    float r = (float)random_int(0, 512),
+          g = (float)random_int(0, 512),
+          b = (float)random_int(0, 512);
     int e = r > g + b;
     
     float x[3] = { r, g, b };
