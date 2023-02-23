@@ -18,10 +18,12 @@ extern "C" {
  */
 typedef void (nn_destroy_fn)(void *ptr);
 
+struct st_nn_imp_arena;
+
 /**
  * @brief A very basic arena for helping memory management
  */
-typedef struct {} nn_arena_t;
+typedef struct st_nn_imp_arena nn_arena_t;
 
 /**
  * @brief Create an arena

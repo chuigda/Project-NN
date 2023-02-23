@@ -18,23 +18,23 @@ typedef struct st_fnn_layer {
     nn_neuron_t *n[];
 } nn_fnn_layer_t;
 
-typedef struct {
+struct st_nn_imp_fnn {
     nn_fnn_layer_t *layers;
     nn_fnn_layer_t *last;
     
     float *buffer;
     float *buf_ptr[8];
-} nn_fnn_impl_t;
+};
 
 nn_fnn_t *nn_fnn_create() {
-    nn_fnn_impl_t *r = malloc(sizeof(nn_fnn_impl_t));
+    nn_fnn_t *r = malloc(sizeof(nn_fnn_t));
     if (r) {
         r->layers = NULL;
         r->last = NULL;
         r->buffer = NULL;
         memset(&r->buf_ptr, 0, sizeof(r->buf_ptr));
     }
-    return (nn_fnn_t*)r;
+    return r;
 }
 
 void nn_fnn_destroy(nn_fnn_t *fnn) {
@@ -42,9 +42,7 @@ void nn_fnn_destroy(nn_fnn_t *fnn) {
         return;
     }
 
-    nn_fnn_impl_t *impl = (nn_fnn_impl_t*)fnn;
-
-    for (nn_fnn_layer_t *layer = impl->layers;
+    for (nn_fnn_layer_t *layer = fnn->layers;
          layer != NULL;
          /* nop */)
     {
@@ -57,7 +55,7 @@ void nn_fnn_destroy(nn_fnn_t *fnn) {
         free(this_layer);
     }
 
-    free(impl->buffer);
+    free(fnn->buffer);
     free(fnn);
 }
 
@@ -76,12 +74,11 @@ nn_error_t nn_fnn_add_layer(nn_fnn_t *fnn,
         return NN_INVALID_VALUE;
     }
 
-    nn_fnn_impl_t *impl = (nn_fnn_impl_t*)fnn;
-    if (impl->last && impl->last->n_cnt != in_dim) {
+    if (fnn->last && fnn->last->n_cnt != in_dim) {
         return NN_INVALID_VALUE;
     }
 
-    if (impl->buffer) {
+    if (fnn->buffer) {
         return NN_INVALID_OPERATION;
     }
 
@@ -106,14 +103,14 @@ nn_error_t nn_fnn_add_layer(nn_fnn_t *fnn,
         layer->n[i] = n;
     }
 
-    if (!impl->layers) {
+    if (!fnn->layers) {
         layer->prev = NULL;
-        impl->layers = layer;
-        impl->last = layer;
+        fnn->layers = layer;
+        fnn->last = layer;
     } else {
-        layer->prev = impl->last;
-        impl->last->next = layer;
-        impl->last = layer;
+        layer->prev = fnn->last;
+        fnn->last->next = layer;
+        fnn->last = layer;
     }
 
     return NN_NO_ERROR;
@@ -125,9 +122,8 @@ size_t nn_fnn_in_dim(nn_fnn_t *fnn) {
         return 0;
     }
 
-    nn_fnn_impl_t *impl = (nn_fnn_impl_t*)fnn;
-    if (impl->layers) {
-        return nn_neuron_dim(impl->layers->n[0]);
+    if (fnn->layers) {
+        return nn_neuron_dim(fnn->layers->n[0]);
     } else {
         return 0;
     }
@@ -139,9 +135,8 @@ size_t nn_fnn_out_dim(nn_fnn_t *fnn) {
         return 0;
     }
 
-    nn_fnn_impl_t *impl = (nn_fnn_impl_t*)fnn;
-    if (impl->last) {
-        return impl->last->n_cnt;
+    if (fnn->last) {
+        return fnn->last->n_cnt;
     } else {
         return 0;
     }
@@ -153,13 +148,12 @@ nn_error_t nn_fnn_fin(nn_fnn_t *fnn) {
         return NN_INVALID_VALUE;
     }
 
-    nn_fnn_impl_t *impl = (nn_fnn_impl_t*)fnn;
-    if (!impl->layers) {
+    if (!fnn->layers) {
         return NN_INVALID_OPERATION;
     }
 
     size_t max_dim = 0;
-    for (nn_fnn_layer_t *layer = impl->layers;
+    for (nn_fnn_layer_t *layer = fnn->layers;
          layer != NULL;
          layer = layer->next)
     {
@@ -178,9 +172,9 @@ nn_error_t nn_fnn_fin(nn_fnn_t *fnn) {
         return NN_OUT_OF_MEMORY;
     }
 
-    impl->buffer = buffer;
+    fnn->buffer = buffer;
     for (size_t i = 0; i < 8; i++) {
-        impl->buf_ptr[i] = buffer + i * max_dim;
+        fnn->buf_ptr[i] = buffer + i * max_dim;
     }
 
     return NN_NO_ERROR;
@@ -192,8 +186,7 @@ nn_error_t nn_fnn_train(nn_fnn_t *fnn, float *x, float *e, float r) {
         return NN_INVALID_VALUE;
     }
 
-    nn_fnn_impl_t *impl = (nn_fnn_impl_t*)fnn;
-    if (!(impl->layers && impl->buffer)) {
+    if (!(fnn->layers && fnn->buffer)) {
         return NN_INVALID_OPERATION;
     }
     
@@ -206,17 +199,16 @@ nn_error_t nn_fnn_test(nn_fnn_t *fnn, float *x, float *y) {
         return NN_INVALID_VALUE;
     }
 
-    nn_fnn_impl_t *impl = (nn_fnn_impl_t*)fnn;
-    if (!(impl->layers && impl->buffer)) {
+    if (!(fnn->layers && fnn->buffer)) {
         return NN_INVALID_OPERATION;
     }
 
     size_t in_dim = nn_fnn_in_dim(fnn);
-    float *inbuf = impl->buf_ptr[0];
-    float *outbuf = impl->buf_ptr[1];
+    float *inbuf = fnn->buf_ptr[0];
+    float *outbuf = fnn->buf_ptr[1];
     memcpy(inbuf, x, in_dim * sizeof(float));
 
-    for (nn_fnn_layer_t *layer = impl->layers;
+    for (nn_fnn_layer_t *layer = fnn->layers;
          layer != NULL;
          layer = layer->next)
     {

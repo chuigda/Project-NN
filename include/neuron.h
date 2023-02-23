@@ -16,10 +16,12 @@ extern "C" {
 
 #include "transfer.h"
 
+struct st_nn_imp_neuron;
+
 /**
  * @brief A very basic perceptron (artificial neuron)
  */
-typedef struct {} nn_neuron_t;
+typedef struct st_nn_imp_neuron nn_neuron_t;
 
 /**
  * @brief Create a perceptron

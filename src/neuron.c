@@ -3,12 +3,12 @@
 #include <assert.h>
 #include <stdlib.h>
 
-typedef struct {
+struct st_nn_imp_neuron {
   nn_transfer_fn *trans;
   size_t dim;
   float b;
   float w[];
-} nn_neuron_impl_t;
+};
 
 nn_neuron_t *nn_neuron_create(size_t dim, nn_transfer_fn *trans) {
   assert(dim && trans);
@@ -16,7 +16,7 @@ nn_neuron_t *nn_neuron_create(size_t dim, nn_transfer_fn *trans) {
     return NULL;
   }
 
-  nn_neuron_impl_t *r = malloc(sizeof(nn_neuron_impl_t) + dim * sizeof(float));
+  nn_neuron_t *r = malloc(sizeof(nn_neuron_t) + dim * sizeof(float));
   if (!r) {
     return NULL;
   }
@@ -28,7 +28,7 @@ nn_neuron_t *nn_neuron_create(size_t dim, nn_transfer_fn *trans) {
     r->w[i] = 0.0;
   }
 
-  return (nn_neuron_t*)r;
+  return r;
 }
 
 void nn_neuron_destroy(nn_neuron_t *n) {
@@ -41,8 +41,7 @@ size_t nn_neuron_dim(nn_neuron_t *n) {
     return 0;
   }
 
-  nn_neuron_impl_t *impl = (nn_neuron_impl_t*)n;
-  return impl->dim;
+  return n->dim;
 }
 
 void nn_neuron_train(nn_neuron_t *n, float *x, float e, float r) {
@@ -54,11 +53,10 @@ void nn_neuron_train(nn_neuron_t *n, float *x, float e, float r) {
   float y = nn_neuron_test(n, x);
   float d = e - y;
 
-  nn_neuron_impl_t *impl = (nn_neuron_impl_t*)n;
-  for (size_t i = 0; i < impl->dim; i++) {
-    impl->w[i] += r * d * x[i];
+  for (size_t i = 0; i < n->dim; i++) {
+    n->w[i] += r * d * x[i];
   }
-  impl->b += r * d;
+  n->b += r * d;
 }
 
 float nn_neuron_test(nn_neuron_t *n, float *x) {
@@ -67,11 +65,9 @@ float nn_neuron_test(nn_neuron_t *n, float *x) {
     return 0.0;
   }
 
-  nn_neuron_impl_t *impl = (nn_neuron_impl_t*)n;
-
-  float activation = impl->b;
-  for (size_t i = 0; i < impl->dim; i++) {
-    activation += impl->w[i] * x[i];
+  float activation = n->b;
+  for (size_t i = 0; i < n->dim; i++) {
+    activation += n->w[i] * x[i];
   }
-  return impl->trans(activation);
+  return n->trans(activation);
 }

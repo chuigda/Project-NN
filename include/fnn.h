@@ -14,10 +14,12 @@
 extern "C" {
 #endif
 
+struct st_nn_imp_fnn;
+
 /**
  * @brief A full-connected feed-forward neural network
  */
-typedef struct {} nn_fnn_t;
+typedef struct st_nn_imp_fnn nn_fnn_t;
 
 /**
  * @brief Create a FNN

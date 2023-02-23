@@ -14,14 +14,14 @@ typedef struct {
     nn_destroy_fn *dtor;
 } nn_arena_item_t;
 
-typedef struct {
+struct st_nn_imp_arena {
     nn_arena_item_t *items;
     size_t size;
     size_t cap;
-} nn_arena_impl_t;
+};
 
 nn_arena_t *nn_arena_create() {
-    nn_arena_impl_t *r = malloc(sizeof(nn_arena_impl_t));
+    nn_arena_t *r = malloc(sizeof(nn_arena_t));
     if (!r) {
         return NULL;
     }
@@ -29,7 +29,7 @@ nn_arena_t *nn_arena_create() {
     r->items = NULL;
     r->size = 0;
     r->cap = 0;
-    return (nn_arena_t*)r;
+    return r;
 }
 
 void nn_arena_destroy(nn_arena_t *arena) {
@@ -37,16 +37,15 @@ void nn_arena_destroy(nn_arena_t *arena) {
         return;
     }
 
-    nn_arena_impl_t *impl = (nn_arena_impl_t*)arena;
-    for (size_t i = 0; i < impl->size; i++) {
-        nn_arena_item_t *item = &impl->items[i];
+    for (size_t i = 0; i < arena->size; i++) {
+        nn_arena_item_t *item = &arena->items[i];
         if (item->dtor) {
             item->dtor(item->ptr);
         } else {
             free(item->ptr);
         }
     }
-    free(impl);
+    free(arena);
 }
 
 nn_error_t nn_arena_put(nn_arena_t *arena, void *ptr, nn_destroy_fn *dtor) {
@@ -55,36 +54,35 @@ nn_error_t nn_arena_put(nn_arena_t *arena, void *ptr, nn_destroy_fn *dtor) {
         return NN_INVALID_VALUE;
     }
 
-    nn_arena_impl_t *impl = (nn_arena_impl_t*)arena;
-    if (impl->items == NULL) {
-        impl->items = 
+    if (arena->items == NULL) {
+        arena->items =
             malloc(NN_ARENA_INIT_CAP * sizeof(nn_arena_item_t));
-        if (!impl->items) {
+        if (!arena->items) {
             return NN_OUT_OF_MEMORY;
         }
 
-        impl->cap = NN_ARENA_INIT_CAP;
-        impl->size = 1;
-        impl->items[0] = (nn_arena_item_t) { ptr, dtor };
+        arena->cap = NN_ARENA_INIT_CAP;
+        arena->size = 1;
+        arena->items[0] = (nn_arena_item_t) { ptr, dtor };
         return 1;
     }
 
-    if (impl->size == impl->cap) {
+    if (arena->size == arena->cap) {
         nn_arena_item_t *new_items = 
-            malloc(impl->cap * 2 * sizeof(nn_arena_impl_t));
+            malloc(arena->cap * 2 * sizeof(nn_arena_item_t));
         if (!new_items) {
             return NN_OUT_OF_MEMORY;
         }
 
         memcpy(new_items,
-               impl->items,
-               impl->cap * sizeof(nn_arena_impl_t));
-        free(impl->items);
-        impl->items = new_items;
-        impl->cap *= 2;
+               arena->items,
+               arena->cap * sizeof(nn_arena_item_t));
+        free(arena->items);
+        arena->items = new_items;
+        arena->cap *= 2;
     }
 
-    impl->items[impl->size] = (nn_arena_item_t) { ptr, dtor };
-    impl->size += 1;
+    arena->items[arena->size] = (nn_arena_item_t) { ptr, dtor };
+    arena->size += 1;
     return NN_NO_ERROR;
 }

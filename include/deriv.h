@@ -4,7 +4,7 @@
  */
 
 #ifndef PROJECT_NN_DERIV_H
-#define PROJECT_NN_DERIVE_H
+#define PROJECT_NN_DERIV_H
 
 #include "transfer.h"
 #include "error.h"
