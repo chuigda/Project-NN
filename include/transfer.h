@@ -43,7 +43,7 @@ float nn_transfer_logistic(float value);
  */
 float nn_transfer_tanh(float value);
 
-/**
+/** 
  * @brief ReLU/Rectifier function
  * @param value input value
  * @return `value > 0.0f ? value : 0.0f`
