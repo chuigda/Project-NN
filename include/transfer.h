@@ -25,9 +25,23 @@ float nn_transfer_thres(float value);
 /**
  * @brief Logistic sigmoid function
  * @param value input value
- * @return `(float)(1.0 / (1.0 + exp(-value)))`
+ * @return `1.0f / (1.0f + expf(-value))`
  */
- float nn_transfer_logistic(float value);
+float nn_transfer_logistic(float value);
+
+/**
+ * @brief Tanh sigmoid function
+ * @param value input value
+ * @return `(expf(x) - expf(-x)) / (expf(x) + expf(-x))`
+ */
+float nn_transfer_tanh(float value);
+
+/**
+ * @brief ReLU/Rectifier function
+ * @param value input value
+ * @return `value > 0.0f ? value : 0.0f`
+ */
+float nn_transfer_relu(float value);
 
 #ifdef __cplusplus
 } /* extern "C" */
