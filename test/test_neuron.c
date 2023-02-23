@@ -26,9 +26,9 @@ int main() {
 
   int correct = 0, incorrect = 0;
   for (size_t i = 0; i < 4096; i++) {
-    float r = (float)random_int(0, 512),
-          g = (float)random_int(0, 512),
-          b = (float)random_int(0, 512);
+    float r = (float)random_int(0, 4096),
+          g = (float)random_int(0, 4096),
+          b = (float)random_int(0, 4096);
     int e = r > g + b;
     
     float x[3] = { r, g, b };

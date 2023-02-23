@@ -1,8 +1,10 @@
 #include "fnn.h"
-#include "neuron.h"
 
 #include <assert.h>
 #include <stdlib.h>
+#include <string.h>
+#include "neuron.h"
+#include "impl/util.h"
 
 typedef struct st_fnn_layer {
     struct st_fnn_layer *prev;
@@ -51,10 +53,11 @@ void nn_fnn_destroy(nn_fnn_t *fnn) {
     if (impl->buffer1) {
         free(impl->buffer1);
     }
-
     if (impl->buffer2) {
         free(impl->buffer2);
     }
+
+    free(fnn);
 }
 
 nn_error_t nn_fnn_add_layer(nn_fnn_t *fnn,
@@ -175,7 +178,6 @@ nn_error_t nn_fnn_fin(nn_fnn_t *fnn) {
     return NN_NO_ERROR;
 }
 
-/*
 nn_error_t nn_fnn_test(nn_fnn_t *fnn, float *x, float *y) {
     assert(fnn && x && y);
     if (!(fnn && x && y)) {
@@ -183,12 +185,28 @@ nn_error_t nn_fnn_test(nn_fnn_t *fnn, float *x, float *y) {
     }
 
     nn_fnn_impl_t *impl = (nn_fnn_impl_t*)fnn;
-    if (!impl->layers) {
+    if (!(impl->layers && impl->buffer1 && impl->buffer2)) {
         return NN_INVALID_OPERATION;
     }
 
-    
+    size_t in_dim = nn_fnn_in_dim(fnn);
+    float *inbuf = impl->buffer1;
+    float *outbuf = impl->buffer2;
+    memcpy(inbuf, x, in_dim * sizeof(float));
+
+    for (nn_fnn_layer_t *layer = impl->layers;
+         layer != NULL;
+         layer = layer->next)
+    {
+        for (size_t i = 0; i < layer->n_cnt; i++) {
+            outbuf[i] = nn_neuron_test(layer->n[i], inbuf);
+        }
+
+        NN_IMP_SWAP(float*, inbuf, outbuf);
+    }
+
+    size_t out_dim = nn_fnn_out_dim(fnn);
+    memcpy(y, inbuf, out_dim * sizeof(float));
 
     return NN_NO_ERROR;
 }
-*/
