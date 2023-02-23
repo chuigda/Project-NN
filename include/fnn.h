@@ -46,6 +46,7 @@ void nn_fnn_destroy(nn_fnn_t *fnn);
  *   - `NN_NO_ERROR` on success
  *   - `NN_OUT_OF_MEMORY` on out of memory
  *   - `NN_INVALID_VALUE` on dimension mismatch
+ *   - `NN_INVALID_OPERATION` if `fnn` has already been finalized
  */
 nn_error_t nn_fnn_add_layer(nn_fnn_t *fnn,
                             size_t in_dim,
@@ -68,8 +69,29 @@ size_t nn_fnn_in_dim(nn_fnn_t *fnn);
  */
 size_t nn_fnn_out_dim(nn_fnn_t *fnn);
 
+/**
+ * @brief Finalize the FNN, allocate auxiliary space for it
+ * @param fnn the FNN, must not be `NULL`
+ * @return
+ *   - `NN_NO_ERROR` on success
+ *   - `NN_INVALID_OPERATION` if `fnn` has not been properly initialised,
+ *     or `fnn` has already been finalized
+ *   - `NN_OUT_OF_MEMORY` if failed allocating auxiliary space
+ */
+nn_error_t nn_fnn_fin(nn_fnn_t *fnn);
+
 nn_error_t nn_fnn_train(nn_fnn_t *fnn, float *x, float *e, float r);
 
+/**
+ * @brief Feed the FNN with an input vector, get its output
+ * @param fnn the FNN, must not be `NULL`
+ * @param x input vector, must not be `NULL`
+ * @param y output vector, must not be `NULL`
+ * @return
+ *   - `NN_NO_ERROR` on success
+ *   - `NN_INVALID_OPERATION` if `fnn` has not been properly initialised
+ *     and finalized
+ */
 nn_error_t nn_fnn_test(nn_fnn_t *fnn, float *x, float *y);
 
 #ifdef __cplusplus

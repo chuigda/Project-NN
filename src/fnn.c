@@ -15,13 +15,18 @@ typedef struct st_fnn_layer {
 typedef struct {
     nn_fnn_layer_t *layers;
     nn_fnn_layer_t *last;
+    
+    float *buffer1;
+    float *buffer2;
 } nn_fnn_impl_t;
 
 nn_fnn_t *nn_fnn_create() {
-    nn_fnn_impl_t *r = malloc(sizeof(nn_fnn_layer_t));
+    nn_fnn_impl_t *r = malloc(sizeof(nn_fnn_impl_t));
     if (r) {
         r->layers = NULL;
         r->last = NULL;
+        r->buffer1 = NULL;
+        r->buffer2 = NULL;
     }
     return (nn_fnn_t*)r;
 }
@@ -42,6 +47,14 @@ void nn_fnn_destroy(nn_fnn_t *fnn) {
         layer = this_layer->next;
         free(this_layer);
     }
+
+    if (impl->buffer1) {
+        free(impl->buffer1);
+    }
+
+    if (impl->buffer2) {
+        free(impl->buffer2);
+    }
 }
 
 nn_error_t nn_fnn_add_layer(nn_fnn_t *fnn,
@@ -56,6 +69,10 @@ nn_error_t nn_fnn_add_layer(nn_fnn_t *fnn,
     nn_fnn_impl_t *impl = (nn_fnn_impl_t*)fnn;
     if (impl->last && impl->last->n_cnt != in_dim) {
         return NN_INVALID_VALUE;
+    }
+
+    if (impl->buffer1) {
+        return NN_INVALID_OPERATION;
     }
 
     nn_fnn_layer_t *layer = 
@@ -99,7 +116,7 @@ size_t nn_fnn_in_dim(nn_fnn_t *fnn) {
 
     nn_fnn_impl_t *impl = (nn_fnn_impl_t*)fnn;
     if (impl->layers) {
-        return nn_neuron_in_dim(impl->layers->n[0]);
+        return nn_neuron_dim(impl->layers->n[0]);
     } else {
         return 0;
     }
@@ -118,3 +135,60 @@ size_t nn_fnn_out_dim(nn_fnn_t *fnn) {
         return 0;
     }
 }
+
+nn_error_t nn_fnn_fin(nn_fnn_t *fnn) {
+    assert(fnn);
+    if (!fnn) {
+        return NN_INVALID_VALUE;
+    }
+
+    nn_fnn_impl_t *impl = (nn_fnn_impl_t*)fnn;
+    if (!impl->layers) {
+        return NN_INVALID_OPERATION;
+    }
+
+    size_t max_dim = 0;
+    for (nn_fnn_layer_t *layer = impl->layers;
+         layer != NULL;
+         layer = layer->next)
+    {
+        size_t neuron_in_dim = nn_neuron_dim(layer->n[0]);
+        if (neuron_in_dim > max_dim) {
+            max_dim = neuron_in_dim;
+        }
+
+        if (layer->n_cnt > max_dim) {
+            max_dim = layer->n_cnt;
+        }
+    }
+
+    float *buffer1 = malloc(max_dim * sizeof(float));
+    float *buffer2 = malloc(max_dim * sizeof(float));
+    if (!(buffer1 && buffer2)) {
+        free(buffer1);
+        free(buffer2);
+        return NN_OUT_OF_MEMORY;
+    }
+
+    impl->buffer1 = buffer1;
+    impl->buffer2 = buffer2;
+    return NN_NO_ERROR;
+}
+
+/*
+nn_error_t nn_fnn_test(nn_fnn_t *fnn, float *x, float *y) {
+    assert(fnn && x && y);
+    if (!(fnn && x && y)) {
+        return NN_INVALID_VALUE;
+    }
+
+    nn_fnn_impl_t *impl = (nn_fnn_impl_t*)fnn;
+    if (!impl->layers) {
+        return NN_INVALID_OPERATION;
+    }
+
+    
+
+    return NN_NO_ERROR;
+}
+*/

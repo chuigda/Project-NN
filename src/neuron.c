@@ -35,7 +35,7 @@ void nn_neuron_destroy(nn_neuron_t *n) {
   free(n);
 }
 
-size_t nn_neuron_in_dim(nn_neuron_t *n) {
+size_t nn_neuron_dim(nn_neuron_t *n) {
   assert(n);
   if (!n) {
     return 0;

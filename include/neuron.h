@@ -42,7 +42,7 @@ void nn_neuron_destroy(nn_neuron_t* n);
  * @param n the perceptron, must not be `NULL`
  * @return the input dimension of the perceptron
  */
-size_t nn_neuron_in_dim(nn_neuron_t *n);
+size_t nn_neuron_dim(nn_neuron_t *n);
 
 /**
  * @brief Train the perceptron with an input and expected output
