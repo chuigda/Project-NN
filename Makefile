@@ -2,7 +2,7 @@ ifndef CC
 	CC = gcc
 endif
 ifndef CFLAGS
-	CFLAGS = -Wall -Wextra -Iinclude -O2 -g $(EXTRA_CFLAGS)
+	CFLAGS = -Wall -Wextra -Iinclude -g $(EXTRA_CFLAGS)
 endif
 
 define LOG
@@ -54,7 +54,7 @@ define RUN_TEST_ITEM
 endef
 
 .PHONY: test test-log
-test: libn2nn test-log test_arena test_neuron
+test: libn2nn test-log test_arena test_neuron test_fnn
 
 test-log:
 	@echo 'Running tests'
@@ -66,6 +66,10 @@ test_arena: test_arena.bin
 .PHONY: test_neuron
 test_neuron: test_neuron.bin
 	$(call RUN_TEST_ITEM,test_neuron.bin)
+
+.PHONY: test_fnn
+test_fnn: test_fnn.bin
+	$(call RUN_TEST_ITEM,test_fnn.bin)
 
 %.bin: test/%.c libn2nn.so
 	$(call BUILD_TEST_ITEM,$@,$<)

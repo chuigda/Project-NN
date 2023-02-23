@@ -59,7 +59,7 @@ nn_error_t nn_fnn_add_layer(nn_fnn_t *fnn,
     }
 
     nn_fnn_layer_t *layer = 
-        malloc(sizeof(nn_fnn_layer_t) + n_cnt * sizeof(nn_neuron_t));
+        malloc(sizeof(nn_fnn_layer_t) + n_cnt * sizeof(nn_neuron_t*));
     if (!layer) {
         return NN_OUT_OF_MEMORY;
     }
@@ -75,7 +75,6 @@ nn_error_t nn_fnn_add_layer(nn_fnn_t *fnn,
             free(layer);
             return NN_OUT_OF_MEMORY;
         }
-        
         layer->n[i] = n;
     }
 
