@@ -97,28 +97,21 @@ size_t nn_fnn_in_dim(nn_fnn_t *fnn);
 size_t nn_fnn_out_dim(nn_fnn_t *fnn);
 
 /**
- * @brief Finalize the FNN, allocate auxiliary space for it
- * @param fnn the FNN, must not be `NULL`
- * @return
- *   - `NN_NO_ERROR` on success
- *   - `NN_INVALID_OPERATION` if `fnn` has not been properly initialised,
- *      or `fnn` has already been finalized
- *   - `NN_OUT_OF_MEMORY` if failed allocating auxiliary space
- */
-nn_error_t nn_fnn_fin(nn_fnn_t *fnn);
-
-/**
  * @brief Train the FNN with given input/output at a learning rate
  * @param fnn the FNN, must not be `NULL`
  * @param x input vector, must not be `NULL`
  * @param e expected output, must not be `NULL`
  * @param r learning rate
+ * @param p_err error output, may be `NULL`
  * @return
  *   - `NN_NO_ERROR` on success
  *   - `NN_INVALID_OPERATION` if `fnn` has not been properly initalized
- *     and finalized
  */
-nn_error_t nn_fnn_train(nn_fnn_t *fnn, float *x, float *e, float r);
+nn_error_t nn_fnn_train(nn_fnn_t *fnn,
+                        float *x,
+                        float *e,
+                        float r,
+                        float *p_err);
 
 /**
  * @brief Feed the FNN with an input vector, get its output
@@ -128,7 +121,6 @@ nn_error_t nn_fnn_train(nn_fnn_t *fnn, float *x, float *e, float r);
  * @return
  *   - `NN_NO_ERROR` on success
  *   - `NN_INVALID_OPERATION` if `fnn` has not been properly initialised
- *     and finalized
  */
 nn_error_t nn_fnn_test(nn_fnn_t *fnn, float *x, float *y);
 

@@ -31,7 +31,7 @@ void test_neuron1() {
     int e = r > g + b;
 
     float x[3] = { r, g, b };
-    int y = round(nn_neuron_test(n, x));
+    int y = round(nn_neuron_test(n, x, NULL));
     
     if (e == y) {
       correct += 1;
@@ -68,7 +68,7 @@ void test_neuron2() {
     float e = r + g + b;
 
     float x[3] = { r, g, b };
-    float y = nn_neuron_test(n, x);
+    float y = nn_neuron_test(n, x, NULL);
     
     float err = fabs(e - y);
     float err_percent = fabs((e - y) / e);

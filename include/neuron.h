@@ -50,6 +50,14 @@ void nn_neuron_destroy(nn_neuron_t* n);
 size_t nn_neuron_dim(nn_neuron_t *n);
 
 /**
+ * @brief Get the weight vector
+ * @param n the perceptron, must not be `NULL`
+ * @return the `dim + 1` dimension weight vector of the perceptron. the
+ *         first value is the bias
+ */
+float *nn_neuron_w(nn_neuron_t *n);
+
+/**
  * @brief Prewarms the perceptron by setting weights and bias to fixed
  *        value
  * @param n the perceptron, must not be `NULL`
@@ -79,9 +87,11 @@ void nn_neuron_train(nn_neuron_t *n, float *x, float e, float r);
  * @brief Feed the perceptron with an input vector, get its output
  * @param n the perceptron, must not be `NULL`
  * @param x input vector, must not be `NULL`
+ * @param activ activation return position, can be `NULL` and in that
+ *              case perceptron will only return its output
  * @return perceptron's output
  */
-float nn_neuron_test(nn_neuron_t *n, float *x);
+float nn_neuron_test(nn_neuron_t *n, float *x, float *activ);
 
 #ifdef __cplusplus
 } /* extern "C" */

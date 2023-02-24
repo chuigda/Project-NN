@@ -11,6 +11,9 @@ struct st_nn_imp_neuron {
   float w[];
 };
 
+_Static_assert(offsetof(nn_neuron_t, w) - offsetof(nn_neuron_t, b)
+               == sizeof(float));
+
 nn_neuron_t *nn_neuron_create(size_t dim, nn_transfer_fn *trans) {
   assert(dim && trans);
   if (!(dim && trans)) {
@@ -45,6 +48,15 @@ size_t nn_neuron_dim(nn_neuron_t *n) {
   return n->dim;
 }
 
+float *nn_neuron_w(nn_neuron_t *n) {
+  assert(n);
+  if (!n) {
+    return NULL;
+  }
+
+  return &n->b;
+}
+
 void nn_neuron_prewarm(nn_neuron_t *n, float v) {
   assert(n);
   if (!n) {
@@ -75,7 +87,7 @@ void nn_neuron_train(nn_neuron_t *n, float *x, float e, float r) {
     return;
   }
 
-  float y = nn_neuron_test(n, x);
+  float y = nn_neuron_test(n, x, NULL);
   float d = e - y;
 
   for (size_t i = 0; i < n->dim; i++) {
@@ -84,7 +96,7 @@ void nn_neuron_train(nn_neuron_t *n, float *x, float e, float r) {
   n->b += r * d;
 }
 
-float nn_neuron_test(nn_neuron_t *n, float *x) {
+float nn_neuron_test(nn_neuron_t *n, float *x, float *activ) {
   assert(n);
   if (!n) {
     return 0.0;
@@ -93,6 +105,10 @@ float nn_neuron_test(nn_neuron_t *n, float *x) {
   float activation = n->b;
   for (size_t i = 0; i < n->dim; i++) {
     activation += n->w[i] * x[i];
+  }
+
+  if (activ) {
+    *activ = activation;
   }
   return n->trans(activation);
 }

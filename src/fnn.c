@@ -11,10 +11,12 @@ typedef struct st_fnn_layer {
     struct st_fnn_layer *prev;
     struct st_fnn_layer *next;
 
+    nn_transfer_fn *trans;
     nn_deriv_fn *deriv;
 
     size_t n_cnt;
     nn_neuron_t **n;
+    float *activation;
     float *output;
     float *delta;
 
@@ -24,9 +26,6 @@ typedef struct st_fnn_layer {
 struct st_nn_imp_fnn {
     nn_fnn_layer_t *layers;
     nn_fnn_layer_t *last;
-    
-    float *buffer;
-    float *buf_ptr[4];
 };
 
 static void nn_imp_fnn_test(nn_fnn_t *fnn, float *x, float *y);
@@ -36,8 +35,6 @@ nn_fnn_t *nn_fnn_create() {
     if (r) {
         r->layers = NULL;
         r->last = NULL;
-        r->buffer = NULL;
-        memset(&r->buf_ptr, 0, sizeof(r->buf_ptr));
     }
     return r;
 }
@@ -60,7 +57,6 @@ void nn_fnn_destroy(nn_fnn_t *fnn) {
         free(this_layer);
     }
 
-    free(fnn->buffer);
     free(fnn);
 }
 
@@ -83,24 +79,23 @@ nn_error_t nn_fnn_add_layer(nn_fnn_t *fnn,
         return NN_INVALID_VALUE;
     }
 
-    if (fnn->buffer) {
-        return NN_INVALID_OPERATION;
-    }
-
     size_t extra_size = 
-        n_cnt * (sizeof(nn_neuron_t*) + 2 * sizeof(float));
+        n_cnt * (sizeof(nn_neuron_t*) + 3 * sizeof(float));
 
     nn_fnn_layer_t *layer = malloc(sizeof(nn_fnn_layer_t) + extra_size);
     if (!layer) {
         return NN_OUT_OF_MEMORY;
     }
 
-    size_t output_offset = n_cnt * sizeof(nn_neuron_t*);
+    size_t activation_offset = n_cnt * sizeof(nn_neuron_t*);
+    size_t output_offset = activation_offset + n_cnt * sizeof(float);
     size_t delta_offset = output_offset + n_cnt * sizeof(float);
     layer->next = NULL;
+    layer->trans = trans;
     layer->deriv = deriv;
     layer->n_cnt = n_cnt;
     layer->n = (nn_neuron_t**)layer->buffer;
+    layer->activation = (float*)(layer->buffer + activation_offset);
     layer->output = (float*)(layer->buffer + output_offset);
     layer->delta = (float*)(layer->buffer + delta_offset);
     for (size_t i = 0; i < n_cnt; i++) {
@@ -188,9 +183,13 @@ size_t nn_fnn_out_dim(nn_fnn_t *fnn) {
     }
 }
 
-nn_error_t nn_fnn_fin(nn_fnn_t *fnn) {
-    assert(fnn);
-    if (!fnn) {
+nn_error_t nn_fnn_train(nn_fnn_t *fnn,
+                        float *x,
+                        float *e,
+                        float r,
+                        float *p_err) {
+    assert(fnn && x && e && r > 0.0f);
+    if (!(fnn && x && e && r > 0.0f)) {
         return NN_INVALID_VALUE;
     }
 
@@ -198,45 +197,70 @@ nn_error_t nn_fnn_fin(nn_fnn_t *fnn) {
         return NN_INVALID_OPERATION;
     }
 
-    size_t max_dim = 0;
+    /* forward propagate */
+    nn_imp_fnn_test(fnn, x, NULL);
+
+    /* back propagate error and store in neurons */
+    if (p_err) {
+        *p_err = 0;
+    }
+    {
+        nn_fnn_layer_t *layer = fnn->last;
+        for (size_t i = 0; i < layer->n_cnt; i++) {
+            float error = layer->output[i] - e[i];
+            if (p_err) {
+                *p_err += error;
+            }
+            float deriv = layer->deriv(layer->trans,
+                                       layer->activation[i],
+                                       layer->output[i]);
+            layer->delta[i] = error * deriv;
+        }
+        if (p_err) {
+            *p_err /= (float)layer->n_cnt;
+        }
+    }
+
+    for (nn_fnn_layer_t *layer = fnn->last->prev;
+         layer != NULL;
+         layer = layer->prev)
+    {
+        nn_fnn_layer_t *next_layer = layer->next;
+        for (size_t i = 0; i < layer->n_cnt; i++) {
+            float error = 0.0f;
+            for (size_t j = 0; j < next_layer->n_cnt; j++) {
+                nn_neuron_t *n = next_layer->n[j];
+                float *w = nn_neuron_w(n);
+                error += w[i + 1] * next_layer->delta[j];
+            }
+            float deriv = layer->deriv(layer->trans,
+                                       layer->activation[i],
+                                       layer->output[i]);
+            layer->delta[i] = error * deriv;
+        }
+    }
+
+    /* update network weights with error */
     for (nn_fnn_layer_t *layer = fnn->layers;
          layer != NULL;
          layer = layer->next)
     {
-        size_t neuron_in_dim = nn_neuron_dim(layer->n[0]);
-        if (neuron_in_dim > max_dim) {
-            max_dim = neuron_in_dim;
+        float *inputs = layer->prev == NULL 
+            ? x 
+            : layer->prev->output;
+        size_t in_dim = nn_neuron_dim(layer->n[0]);
+        for (size_t i = 0; i < layer->n_cnt; i++) {
+            nn_neuron_t *n = layer->n[i];
+            float delta = layer->delta[i];
+            float *w = nn_neuron_w(n);
+            for (size_t j = 0; j < in_dim; j++) {
+                w[j + 1] += r * delta * inputs[j];
+            }
+            w[0] += r * delta;
         }
-
-        if (layer->n_cnt > max_dim) {
-            max_dim = layer->n_cnt;
-        }
-    }
-
-    float *buffer = malloc(max_dim * 8 * sizeof(float));
-    if (!buffer) {
-        return NN_OUT_OF_MEMORY;
-    }
-
-    fnn->buffer = buffer;
-    for (size_t i = 0; i < 4; i++) {
-        fnn->buf_ptr[i] = buffer + i * max_dim;
     }
 
     return NN_NO_ERROR;
-}
-
-nn_error_t nn_fnn_train(nn_fnn_t *fnn, float *x, float *e, float r) {
-    assert(fnn && x && e && r > 0.0f);
-    if (!(fnn && x && e && r > 0.0f)) {
-        return NN_INVALID_VALUE;
-    }
-
-    if (!(fnn->layers && fnn->buffer)) {
-        return NN_INVALID_OPERATION;
-    }
-
-    return NN_UNIMPLEMENTED;
 }
 
 nn_error_t nn_fnn_test(nn_fnn_t *fnn, float *x, float *y) {
@@ -245,7 +269,7 @@ nn_error_t nn_fnn_test(nn_fnn_t *fnn, float *x, float *y) {
         return NN_INVALID_VALUE;
     }
 
-    if (!(fnn->layers && fnn->buffer)) {
+    if (!fnn->layers) {
         return NN_INVALID_OPERATION;
     }
 
@@ -267,8 +291,11 @@ static void nn_imp_fnn_test(nn_fnn_t *fnn, float *x, float *y) {
         }
 
         for (size_t i = 0; i < layer->n_cnt; i++) {
-            outbuf[i] = nn_neuron_test(layer->n[i], inbuf);
+            outbuf[i] = nn_neuron_test(layer->n[i],
+                                       inbuf,
+                                       &layer->activation[i]);
         }
+
         inbuf = outbuf;
     }
 }
