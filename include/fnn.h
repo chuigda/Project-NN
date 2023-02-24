@@ -58,6 +58,29 @@ nn_error_t nn_fnn_add_layer(nn_fnn_t *fnn,
                             nn_transfer_fn *trans);
 
 /**
+ * @brief Prewarms the last added layer by setting neuron weights and
+ *        bias to fixed value
+ * @param fnn the manipulated FNN, must not be `NULL`
+ * @param v value
+ * @return
+ *   - `NN_NO_ERROR` on success
+ *   - `NN_INVALID_OPERATION` if `fnn` has no layer defined yet
+ */
+nn_error_t nn_fnn_prewarm(nn_fnn_t *fnn, float v);
+
+/**
+ * @brief Prewarms the last added layer by settings neuron weights and
+ *        bias to random values
+ * @param fnn the manipulated FNN, must not be `NULL`
+ * @param l lower bound
+ * @param r upper bound, must be greater than `l`
+ * @return
+ *   - `NN_NO_ERROR` on success
+ *   - `NN_INVALID_OPERATION` if `fnn` has no layer defined yet
+ */
+nn_error_t nn_fnn_prewarm_rand(nn_fnn_t *fnn, float l, float r);
+
+/**
  * @brief Get the input dimension of the FNN
  * @param fnn the FNN, must not be `NULL`
  * @return input dimension of the FNN (in effect, the `in_dim` of first

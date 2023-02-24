@@ -2,6 +2,7 @@
 
 #include <assert.h>
 #include <stdlib.h>
+#include "impl/util.h"
 
 struct st_nn_imp_neuron {
   nn_transfer_fn *trans;
@@ -42,6 +43,30 @@ size_t nn_neuron_dim(nn_neuron_t *n) {
   }
 
   return n->dim;
+}
+
+void nn_neuron_prewarm(nn_neuron_t *n, float v) {
+  assert(n);
+  if (!n) {
+    return;
+  }
+
+  for (size_t i = 0; i < n->dim; i++) {
+    n->w[i] = v;
+  }
+  n->b = v;
+}
+
+void nn_neuron_prewarm_rand(nn_neuron_t *n, float l, float r) {
+  assert(n && l < r);
+  if (!(n && l < r)) {
+    return;
+  }
+
+  for (size_t i = 0; i < n->dim; i++) {
+    n->w[i] = nn_imp_randf(l, r);
+  }
+  n->b = nn_imp_randf(l, r);
 }
 
 void nn_neuron_train(nn_neuron_t *n, float *x, float e, float r) {

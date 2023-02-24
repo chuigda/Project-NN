@@ -50,6 +50,23 @@ void nn_neuron_destroy(nn_neuron_t* n);
 size_t nn_neuron_dim(nn_neuron_t *n);
 
 /**
+ * @brief Prewarms the perceptron by setting weights and bias to fixed
+ *        value
+ * @param n the perceptron, must not be `NULL`
+ * @param v value
+ */
+void nn_neuron_prewarm(nn_neuron_t *n, float v);
+
+/**
+ * @brief Prewarms the perceptron by setting weights and bias to random
+ *        values
+ * @param n the perceptron, must not be `NULL`
+ * @param l lower bound
+ * @param r upper bound, must be greater than `l`
+ */
+void nn_neuron_prewarm_rand(nn_neuron_t *n, float l, float r);
+
+/**
  * @brief Train the perceptron with given input/output at a learning rate
  * @param n the perceptron, must not be `NULL`
  * @param x input vector, must not be `NULL`

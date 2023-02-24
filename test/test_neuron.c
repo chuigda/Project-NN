@@ -12,7 +12,7 @@ static int random_int(int l, int r) {
 
 void test_neuron1() {
   nn_neuron_t *n = nn_neuron_create(3, nn_transfer_thres);
-  
+
   for (size_t i = 0; i < 4096 * 4096; i++) {
     float r = (float)random_int(0, 256),
           g = (float)random_int(0, 256),

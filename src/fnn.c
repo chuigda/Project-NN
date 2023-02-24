@@ -6,7 +6,6 @@
 
 #include "deriv.h"
 #include "neuron.h"
-#include "impl/util.h"
 
 typedef struct st_fnn_layer {
     struct st_fnn_layer *prev;
@@ -29,6 +28,8 @@ struct st_nn_imp_fnn {
     float *buffer;
     float *buf_ptr[4];
 };
+
+static void nn_imp_fnn_test(nn_fnn_t *fnn, float *x, float *y);
 
 nn_fnn_t *nn_fnn_create() {
     nn_fnn_t *r = malloc(sizeof(nn_fnn_t));
@@ -127,6 +128,40 @@ nn_error_t nn_fnn_add_layer(nn_fnn_t *fnn,
     return NN_NO_ERROR;
 }
 
+nn_error_t nn_fnn_prewarm(nn_fnn_t *fnn, float v) {
+    assert(fnn);
+    if (!fnn) {
+        return NN_INVALID_VALUE;
+    }
+
+    if (!fnn->last) {
+        return NN_INVALID_OPERATION;
+    }
+
+    for (size_t i = 0; i < fnn->last->n_cnt; i++) {
+        nn_neuron_prewarm(fnn->last->n[i], v);
+    }
+
+    return NN_NO_ERROR;
+}
+
+nn_error_t nn_fnn_prewarm_rand(nn_fnn_t *fnn, float l, float r) {
+    assert(fnn && l < r);
+    if (!(fnn && l < r)) {
+        return NN_INVALID_VALUE;
+    }
+
+    if (!fnn->last) {
+        return NN_INVALID_OPERATION;
+    }
+
+    for (size_t i = 0; i < fnn->last->n_cnt; i++) {
+        nn_neuron_prewarm_rand(fnn->last->n[i], l, r);
+    }
+
+    return NN_NO_ERROR;
+}
+
 size_t nn_fnn_in_dim(nn_fnn_t *fnn) {
     assert(fnn);
     if (!fnn) {
@@ -214,24 +249,26 @@ nn_error_t nn_fnn_test(nn_fnn_t *fnn, float *x, float *y) {
         return NN_INVALID_OPERATION;
     }
 
-    size_t in_dim = nn_fnn_in_dim(fnn);
-    float *inbuf = fnn->buf_ptr[0];
-    float *outbuf = fnn->buf_ptr[1];
-    memcpy(inbuf, x, in_dim * sizeof(float));
+    nn_imp_fnn_test(fnn, x, y);
+    return NN_NO_ERROR;
+}
 
+static void nn_imp_fnn_test(nn_fnn_t *fnn, float *x, float *y) {
+    float *inbuf = x;
     for (nn_fnn_layer_t *layer = fnn->layers;
          layer != NULL;
          layer = layer->next)
     {
+        float *outbuf;
+        if (layer->next == NULL && y) {
+            outbuf = y;
+        } else {
+            outbuf = layer->output;
+        }
+
         for (size_t i = 0; i < layer->n_cnt; i++) {
             outbuf[i] = nn_neuron_test(layer->n[i], inbuf);
         }
-
-        NN_IMP_SWAP(float*, inbuf, outbuf);
+        inbuf = outbuf;
     }
-
-    size_t out_dim = nn_fnn_out_dim(fnn);
-    memcpy(y, inbuf, out_dim * sizeof(float));
-
-    return NN_NO_ERROR;
 }
