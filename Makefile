@@ -79,7 +79,8 @@ test_neuron: test_neuron.bin
 
 .PHONY: test_fnn
 test_fnn: test_fnn.bin
-	$(call RUN_TEST_ITEM,test_fnn,1,1)
+	$(call RUN_TEST_ITEM,test_fnn,1,2)
+	$(call RUN_TEST_ITEM,test_fnn,2,2)
 
 %.bin: test/%.c libn2nn.so
 	$(call BUILD_TEST_ITEM,$@,$<)
