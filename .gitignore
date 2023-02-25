@@ -55,3 +55,7 @@ dkms.conf
 # Doxygen output
 html
 latex
+
+# Downloaded MNIST dataset
+dataset/*-images-idx*-ubyte*
+dataset/*-labels-idx*-ubyte*
