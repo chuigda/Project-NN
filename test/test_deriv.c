@@ -16,7 +16,7 @@ static float test_deriv(nn_transfer_fn *trans, float x, float y) {
 }
 
 int main() {
-    assert(nn_deriv(nn_transfer_logistic) == nn_deriv_logistic);
+    assert(nn_deriv(nn_transfer_sigmoid) == nn_deriv_sigmoid);
     assert(nn_deriv(nn_transfer_relu) == nn_deriv_relu);
     assert(nn_deriv(nn_transfer_tanh) == nn_deriv_tanh);
     assert(nn_deriv(nn_transfer_linear) == nn_deriv_linear);
@@ -28,6 +28,6 @@ int main() {
 
     assert(nn_deriv_reg(test_transfer, test_deriv)
            == NN_INVALID_VALUE);
-    assert(nn_deriv_reg(nn_transfer_logistic, test_deriv) 
+    assert(nn_deriv_reg(nn_transfer_sigmoid, test_deriv) 
            == NN_INVALID_VALUE);
 }

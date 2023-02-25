@@ -33,9 +33,9 @@ float nn_deriv_num(nn_transfer_fn *trans, float x, float y);
 float nn_deriv_linear(nn_transfer_fn *trans, float x, float y);
 
 /**
- * @brief Derivative of logistic (`nn_transfer_logistic`)
+ * @brief Derivative of sigmoid (`nn_transfer_sigmoid`)
  */
-float nn_deriv_logistic(nn_transfer_fn *trans, float x, float y);
+float nn_deriv_sigmoid(nn_transfer_fn *trans, float x, float y);
 
 /**
  * @brief Derivative of tanh (`nn_transfer_tanh`)

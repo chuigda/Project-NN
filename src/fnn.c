@@ -209,7 +209,7 @@ nn_error_t nn_fnn_train(nn_fnn_t *fnn,
         for (size_t i = 0; i < layer->n_cnt; i++) {
             float error = layer->output[i] - e[i];
             if (p_err) {
-                *p_err += error;
+                *p_err += fabs(error);
             }
             float deriv = layer->deriv(layer->trans,
                                        layer->activation[i],
@@ -254,9 +254,9 @@ nn_error_t nn_fnn_train(nn_fnn_t *fnn,
             float delta = layer->delta[i];
             float *w = nn_neuron_w(n);
             for (size_t j = 0; j < in_dim; j++) {
-                w[j + 1] += r * delta * inputs[j];
+                w[j + 1] -= r * delta * inputs[j];
             }
-            w[0] += r * delta;
+            w[0] -= r * delta;
         }
     }
 

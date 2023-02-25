@@ -30,11 +30,11 @@ float nn_transfer_linear(float value);
 float nn_transfer_thres(float value);
 
 /**
- * @brief Logistic sigmoid function
+ * @brief Sigmoid function
  * @param value input value
  * @return `1.0f / (1.0f + expf(-value))`
  */
-float nn_transfer_logistic(float value);
+float nn_transfer_sigmoid(float value);
 
 /**
  * @brief Tanh sigmoid function

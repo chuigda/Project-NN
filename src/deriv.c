@@ -20,7 +20,7 @@ float nn_deriv_linear(nn_transfer_fn *trans, float x, float y) {
     return 1;
 }
 
-float nn_deriv_logistic(nn_transfer_fn *trans, float x, float y) {
+float nn_deriv_sigmoid(nn_transfer_fn *trans, float x, float y) {
     (void)trans;
     (void)x;
 
@@ -67,7 +67,7 @@ typedef struct {
 } nn_deriv_entry_t;
 
 static nn_deriv_entry_t g_entries[NN_DERIV_ENTRY_CAP + 5] = {
-    { nn_transfer_logistic, nn_deriv_logistic },
+    { nn_transfer_sigmoid, nn_deriv_sigmoid },
     { nn_transfer_relu, nn_deriv_relu },
     { nn_transfer_tanh, nn_deriv_tanh },
     { nn_transfer_linear, nn_deriv_linear },

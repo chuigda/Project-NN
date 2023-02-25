@@ -10,7 +10,7 @@ float nn_transfer_thres(float value) {
     return value >= 0.0f ? 1.0f : 0.0f;
 }
 
-float nn_transfer_logistic(float value) {
+float nn_transfer_sigmoid(float value) {
     return 1.0f / (1.0f + expf(-value));
 }
 
