@@ -29,6 +29,12 @@ typedef enum {
     /** Out of memory */
     NN_OUT_OF_MEMORY = 0x0505,
 
+    /** I/O error */
+    NN_IO_ERROR = 0x0506,
+
+    /** Bad file format */
+    NN_BAD_FORMAT = 0x0507,
+
     /** Not implemented */
     NN_UNIMPLEMENTED = 0x1145
 } nn_error_t;
