@@ -2,7 +2,7 @@ ifndef CC
 	CC = gcc
 endif
 ifndef CFLAGS
-	CFLAGS = -Wall -Wextra -Iinclude -g $(EXTRA_CFLAGS)
+	CFLAGS = -Wall -Wextra -Iinclude -O2 -g $(EXTRA_CFLAGS)
 endif
 
 define LOG
@@ -81,6 +81,15 @@ test_neuron: test_neuron.bin
 test_fnn: test_fnn.bin
 	$(call RUN_TEST_ITEM,test_fnn,1,2)
 	$(call RUN_TEST_ITEM,test_fnn,2,2)
+
+.PHONY: test_fnn_mnist
+test_fnn_mnist: test_fnn_mnist.bin \
+		dataset/t10k-images-idx3-ubyte \
+		dataset/t10k-labels-idx1-ubyte \
+		dataset/train-images-idx3-ubyte \
+		dataset/train-labels-idx1-ubyte
+	@printf '\tRunning FNN MNIST test\n'
+	@LD_LIBRARY_PATH=. ./test_fnn_mnist.bin
 
 %.bin: test/%.c libn2nn.so
 	$(call BUILD_TEST_ITEM,$@,$<)

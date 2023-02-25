@@ -28,7 +28,7 @@ static uint32_t u32_from_big_endian(uint8_t *buf) {
 }
 
 #define READ_DWORD(var_name) \
-    if (fread(readbuf, 1, 4, fp) != 1) { \
+    if (fread(readbuf, 4, 1, fp) != 1) { \
         nn_error_t err; \
         if (feof(fp)) { \
             err = NN_BAD_FORMAT; \
