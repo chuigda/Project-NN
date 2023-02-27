@@ -42,6 +42,33 @@ int main() {
     assert(err == NN_NO_ERROR);
     assert(train_label_cnt == train_image_cnt);
 
+    uint8_t *test_images;
+    size_t test_image_cnt, test_image_w, test_image_h;
+
+    err = nn_mnist_load_images("./dataset/t10k-images-idx3-ubyte",
+                               &test_images,
+                               &test_image_cnt,
+                               &test_image_w,
+                               &test_image_h);
+    assert(err == NN_NO_ERROR);
+    assert(test_image_w == train_image_w
+           && test_image_h == train_image_h);
+    size_t test_elem_cnt = test_image_cnt * image_elem_cnt;
+    float *test_images_f = malloc(sizeof(float) * test_elem_cnt);
+    assert(test_images_f);
+    for (size_t i = 0; i < test_elem_cnt; i++) {
+        test_images_f[i] = (float)test_images[i] / 255.0f;
+    }
+    free(test_images);
+
+    uint8_t *test_labels;
+    size_t test_label_cnt;
+    err = nn_mnist_load_labels("./dataset/t10k-labels-idx1-ubyte",
+                               &test_labels,
+                               &test_label_cnt);
+    assert(err == NN_NO_ERROR);
+    assert(test_label_cnt == test_image_cnt);
+
     nn_fnn_t *fnn = nn_fnn_create();
 
     err = nn_fnn_add_layer(fnn,
@@ -70,33 +97,6 @@ int main() {
     free(train_images_f);
     free(train_labels);
 
-    uint8_t *test_images;
-    size_t test_image_cnt, test_image_w, test_image_h;
-
-    err = nn_mnist_load_images("./dataset/t10k-images-idx3-ubyte",
-                               &test_images,
-                               &test_image_cnt,
-                               &test_image_w,
-                               &test_image_h);
-    assert(err == NN_NO_ERROR);
-    assert(test_image_w == train_image_w
-           && test_image_h == train_image_h);
-    size_t test_elem_cnt = test_image_cnt * image_elem_cnt;
-    float *test_images_f = malloc(sizeof(float) * test_elem_cnt);
-    assert(test_images_f);
-    for (size_t i = 0; i < test_image_cnt; i++) {
-        test_images_f[i] = (float)test_images[i] / 255.0f;
-    }
-    free(test_images);
-
-    uint8_t *test_labels;
-    size_t test_label_cnt;
-    err = nn_mnist_load_labels("./data/t10k-labels-idx1-ubyte",
-                               &test_labels,
-                               &test_label_cnt);
-    assert(err == NN_NO_ERROR);
-    assert(test_label_cnt == test_image_cnt);
-
     printf("TESTING TRAINED NETWORK ...\n");
     size_t error_count = 0;
     for (size_t i = 0; i < test_image_cnt; i++) {
@@ -111,7 +111,7 @@ int main() {
             error_count += 1;
         }
     }
-    printf("\tTESTED WITH %lu IMAGES, %lu INCORRECTS (%g)\n",
+    printf("\tTESTED WITH %lu IMAGES, %lu INCORRECTS (%g%%)\n",
            test_image_cnt,
            error_count,
            (float)error_count / (float)test_image_cnt * 100.0f);

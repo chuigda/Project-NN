@@ -15,7 +15,7 @@ static const nn_endian_probe_t g_endian_probe = { .v16 = 0xFEFF };
 #define IS_LITTLE_ENDIAN (g_endian_probe.v8 == 0xFF)
 
 static uint32_t u32_from_big_endian(uint8_t *buf) {
-    uint32_t ret;
+    uint32_t ret = 0;
     uint8_t *retbuf = (uint8_t*)&ret;
     if (IS_LITTLE_ENDIAN) {
         for (size_t i = 0; i < 3; i++) {
@@ -54,6 +54,7 @@ nn_error_t nn_mnist_load_images(const char *file_name,
     uint8_t readbuf[4];
     READ_DWORD(magic);
     if (magic != 0x0803) {
+        abort();
         fclose(fp);
         return NN_BAD_FORMAT;
     }
