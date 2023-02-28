@@ -15,7 +15,7 @@ extern "C" {
 
 /**
  * @brief Derivative function of a transfer function
- * @param f the source function
+ * @param trans the source transfer function
  * @param x input `x`
  * @param y output of `f(x)`
  * @return output of ```f'(x)```
