@@ -1,6 +1,7 @@
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <time.h>
 #include "mnist.h"
 #include "fnn.h"
 
@@ -14,6 +15,8 @@ static void fnn_train(nn_fnn_t *fnn,
 static size_t max_float_idx(float *values, size_t cnt);
 
 int main() {
+    srand(time(NULL));
+
     nn_error_t err = NN_NO_ERROR;
     
     uint8_t *train_images;
@@ -79,7 +82,12 @@ int main() {
     err = nn_fnn_prewarm_rand(fnn, -0.5f, 0.5f);
     assert(err == NN_NO_ERROR);
 
-    err = nn_fnn_add_layer(fnn, 300, 10, nn_transfer_sigmoid);
+    err = nn_fnn_add_layer(fnn, 300, 100, nn_transfer_sigmoid);
+    assert(err == NN_NO_ERROR);
+    err = nn_fnn_prewarm_rand(fnn, -0.5f, 0.5f);
+    assert(err == NN_NO_ERROR);
+
+    err = nn_fnn_add_layer(fnn, 100, 10, nn_transfer_sigmoid);
     assert(err == NN_NO_ERROR);
     err = nn_fnn_prewarm_rand(fnn, -0.5f, 0.5f);
     assert(err == NN_NO_ERROR);
@@ -144,7 +152,7 @@ static void fnn_train(nn_fnn_t *fnn,
         err_sum += err;
         e[label] = 0.0f;
 
-        if (i != 0 && i % 5000 == 0) {
+        if (i != 0 && (i + 1) % 5000 == 0) {
             printf("\tPROCESSING IMAGE %lu/%lu (%g%%), REALTIME ERR = %g\n",
                    i + 1,
                    cnt,
