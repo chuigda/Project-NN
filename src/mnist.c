@@ -1,5 +1,6 @@
 #include "mnist.h"
 
+#include <assert.h>
 #include <stdio.h>
 #include <stdint.h>
 #include <stdlib.h>
@@ -46,6 +47,11 @@ nn_error_t nn_mnist_load_images(const char *file_name,
                                 size_t *p_w,
                                 size_t *p_h)
 {
+    assert(file_name && p_images && p_cnt && p_w && p_h);
+    if (!(file_name && p_images && p_cnt && p_w && p_h)) {
+        return NN_INVALID_VALUE;
+    }
+
     FILE *fp = fopen(file_name, "rb");
     if (!fp) {
         return NN_IO_ERROR;
@@ -96,6 +102,11 @@ nn_error_t nn_mnist_load_labels(char const *file_name,
                                 uint8_t **p_labels,
                                 size_t *p_cnt)
 {
+    assert(file_name && p_labels && p_cnt);
+    if (!(file_name && p_labels && p_cnt)) {
+        return NN_INVALID_VALUE;
+    }
+
     FILE *fp = fopen(file_name, "rb");
     if (!fp) {
         return NN_IO_ERROR;
