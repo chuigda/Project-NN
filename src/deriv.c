@@ -66,14 +66,15 @@ typedef struct {
     nn_deriv_fn *deriv;
 } nn_deriv_entry_t;
 
-static nn_deriv_entry_t g_entries[NN_DERIV_ENTRY_CAP + 5] = {
+static nn_deriv_entry_t g_entries[NN_DERIV_ENTRY_CAP + 6] = {
     { nn_transfer_sigmoid, nn_deriv_sigmoid },
-    { nn_transfer_relu, nn_deriv_relu },
+    { nn_transfer_leaky_relu, nn_deriv_leaky_relu },
     { nn_transfer_tanh, nn_deriv_tanh },
+    { nn_transfer_relu, nn_deriv_relu },
     { nn_transfer_linear, nn_deriv_linear },
     { nn_transfer_thres, NULL }
 };
-static size_t g_entries_size = 5;
+static size_t g_entries_size = 6;
 
 nn_error_t nn_deriv_reg(nn_transfer_fn *f, nn_deriv_fn *deriv) {
     assert(f);
@@ -110,4 +111,17 @@ nn_deriv_fn *nn_deriv(nn_transfer_fn *f) {
     }
 
     return nn_deriv_num;
+}
+
+extern float nn_imp_leaky_relu_a; /* defined in transfer.c */
+
+float nn_deriv_leaky_relu(nn_transfer_fn *trans, float x, float y) {
+    (void)trans;
+    (void)y;
+
+    if (x > 0.0f) {
+        return 1.0f;
+    } else {
+        return nn_imp_leaky_relu_a;
+    }
 }

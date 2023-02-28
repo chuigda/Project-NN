@@ -50,6 +50,21 @@ float nn_transfer_tanh(float value);
  */
 float nn_transfer_relu(float value);
 
+/** 
+ * @brief Leaky ReLU function
+ * @param value input value
+ * @return `value > 0.0f ? value : a * value`
+ */
+float nn_transfer_leaky_relu(float value);
+
+/**
+ * @brief Set `a` component of the leaky relu function
+ * @param a newly set a, must be in range `(0.0f, 1.0f)`
+ * @note this function is not thread safe because it interacts with
+ *       some kind of global state
+ */
+void nn_transfer_leaky_relu_set_a(float a);
+
 #ifdef __cplusplus
 } /* extern "C" */
 #endif

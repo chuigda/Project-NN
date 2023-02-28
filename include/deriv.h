@@ -48,6 +48,11 @@ float nn_deriv_tanh(nn_transfer_fn *trans, float x, float y);
 float nn_deriv_relu(nn_transfer_fn *trans, float x, float y);
 
 /**
+ * @brief Derivative of Leaky ReLU (`nn_transfer_leaky_relu`)
+ */
+float nn_deriv_leaky_relu(nn_transfer_fn *trans, float x, float y);
+
+/**
  * @brief Register a derivative function to a transfer function
  * @param f the source function, must not be `NULL`
  * @param deriv the derivative function. can be `NULL`, in that case,
